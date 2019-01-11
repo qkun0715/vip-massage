@@ -5,6 +5,6 @@
 </template>
 <style lang="stylus">
     #app {
-        background-color #f0f0f0
+        background-color #fff
     }
 </style>
