@@ -6,6 +6,9 @@ import OrderForm from './views/OrderForm';
 import Personal from './views/Personal';
 import Groups from './views/Groups';
 import Subscribe from './views/Subscribe';
+import Technician from './views/Technician'
+import SelectionTime from './views/SelectionTime'
+import MyIntegral from './views/MyIntegral'
 
 Vue.use(Router);
 
@@ -26,5 +29,8 @@ export default new Router({
         },
         {path: '/groups', name: 'Groups', component: Groups},
         {path: '/subscribe', name: 'Subscribe', component: Subscribe},
+        {path: '/technician', name: 'Technician', component: Technician},
+        {path: '/selectionTime', name: 'SelectionTime', component: SelectionTime},
+        {path: '/myIntegral', name: 'MyIntegral', component: MyIntegral},
     ],
 });

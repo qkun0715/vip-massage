@@ -38,157 +38,157 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { Toast } from "vant";
-import axios from "axios";
-import ApiService from "../common/ApiService";
+    import {mapState} from 'vuex';
+    import {Toast} from 'vant';
+    import axios from 'axios';
+    import ApiService from '../common/ApiService';
 
-export default {
-  name: "Personal",
-  components: {},
-  data() {
-    return {
-      typeList: [
-        {
-          image: require("../common/images/icon_confirmed.png"),
-          name: "待确定"
+    export default {
+        name: 'Personal',
+        components: {},
+        data() {
+            return {
+                typeList: [
+                    {
+                        image: require('../common/images/icon_confirmed.png'),
+                        name: '待确定',
+                    },
+                    {image: require('../common/images/icon_payment.png'), name: '已确定'},
+                    {
+                        image: require('../common/images/icon_complete.png'),
+                        name: '已完成',
+                    },
+                    {image: require('../common/images/icon_evaluate.png'), name: '待评价'},
+                ],
+                otherList: [
+                    {
+                        image: require('../common/images/icon_integral.png'),
+                        text: '我的积分',
+                    },
+                    {
+                        image: require('../common/images/icon_member.png'),
+                        text: '会员权限',
+                    },
+                    {image: require('../common/images/icon_person.png'), text: '个人信息'},
+                ],
+                effective: '', //可用积分
+                totalIntegral: '', //总分
+                levelList: [], //等级集合
+                one: '',
+                two: '',
+                three: '',
+                four: '',
+                lname_one: '',
+                lname_two: '',
+                lname_three: '',
+                lname_four: '',
+            };
         },
-        { image: require("../common/images/icon_payment.png"), name: "已确定" },
-        {
-          image: require("../common/images/icon_complete.png"),
-          name: "已完成"
+        created() {
+            this.getEffectivePoint();
+            this.getLevelData();
         },
-        { image: require("../common/images/icon_evaluate.png"), name: "待评价" }
-      ],
-      otherList: [
-        {
-          image: require("../common/images/icon_integral.png"),
-          text: "我的积分"
+        computed: {
+            //根据当前积分来判断会员等级
+            memberName() {
+                let member = '';
+                if (this.totalIntegral >= this.one && this.totalIntegral <= this.two) {
+                    member = this.lname_one;
+                } else if (
+                    this.totalIntegral > this.two &&
+                    this.totalIntegral <= this.three
+                ) {
+                    member = this.lname_two;
+                } else if (
+                    this.totalIntegral > this.three &&
+                    this.totalIntegral <= this.four
+                ) {
+                    member = this.lname_three;
+                } else if (this.totalIntegral > this.four) {
+                    member = this.lname_four;
+                }
+                return member;
+            },
+            ...mapState(['userInfo']),
         },
-        {
-          image: require("../common/images/icon_member.png"),
-          text: "会员权限"
+        methods: {
+            /*可用积分*/
+            getEffectivePoint() {
+                axios({
+                    url: ApiService.getEffectivePoint,
+                    method: 'get',
+                    params: {cusId: this.userInfo.id},
+                })
+                    .then(res => {
+                        if (res.data.code === 0 && res.data.rows) {
+                            this.effective = res.data.rows.efective;
+                            this.totalIntegral = res.data.rows.getTotal;
+                        } else {
+
+                            Toast.fail('服务器数据错误');
+                        }
+                    })
+                    .catch(error => {
+                        Toast.fail(error);
+                    });
+            },
+            /*等级规则*/
+            getLevelData() {
+                axios({
+                    url: ApiService.getLevel,
+                    method: 'get',
+                })
+                    .then(res => {
+                        if (res.data.code === 0 && res.data.rows) {
+                            this.levelList = res.data.rows;
+                            this.one = res.data.rows[3].minimum;
+                            this.lname_one = res.data.rows[3].lname;
+                            this.two = res.data.rows[2].minimum;
+                            this.lname_two = res.data.rows[2].lname;
+                            this.three = res.data.rows[1].minimum;
+                            this.lname_three = res.data.rows[1].lname;
+                            this.four = res.data.rows[0].minimum;
+                            this.lname_four = res.data.rows[0].lname;
+                        } else {
+                            Toast.fail('服务器数据错误');
+                        }
+                        console.log(res.data.rows);
+                    })
+                    .catch(error => {
+                        Toast.fail(error);
+                    });
+            },
+            onClick(index) {
+                switch (index) {
+                    case 0:
+                        Toast('待确定');
+                        break;
+                    case 1:
+                        Toast('已确定');
+                        break;
+                    case 2:
+                        Toast('已完成');
+                        break;
+                    case 3:
+                        Toast('待评价');
+                        break;
+                }
+            },
+            onClickItem(index) {
+                switch (index) {
+                    case 0:
+                        this.$router.push({name: 'MyIntegral'});
+                        break;
+                    case 1:
+                        Toast('会员权限');
+                        break;
+                    case 2:
+                        Toast('个人信息');
+                        break;
+                }
+            },
         },
-        { image: require("../common/images/icon_person.png"), text: "个人信息" }
-      ],
-      effective: "", //可用积分
-      totalIntegral: "", //总分
-      levelList: [], //等级集合
-      one: "",
-      two: "",
-      three: "",
-      four: "",
-      lname_one: "",
-      lname_two: "",
-      lname_three: "",
-      lname_four: ""
     };
-  },
-  created() {
-    this.getEffectivePoint();
-    this.getLevelData();
-  },
-  computed: {
-    //根据当前积分来判断会员等级
-    memberName() {
-      let member = "";
-      if (this.totalIntegral >= this.one && this.totalIntegral <= this.two) {
-        member = this.lname_one;
-      } else if (
-        this.totalIntegral > this.two &&
-        this.totalIntegral <= this.three
-      ) {
-        member = this.lname_two;
-      } else if (
-        this.totalIntegral > this.three &&
-        this.totalIntegral <= this.four
-      ) {
-        member = this.lname_three;
-      } else if (this.totalIntegral > this.four) {
-        member = this.lname_four;
-      }
-      return member;
-    },
-    ...mapState(["userInfo"])
-  },
-  methods: {
-    /*可用积分*/
-    getEffectivePoint() {
-      axios({
-        url: ApiService.getEffectivePoint,
-        method: "get",
-        params: { cusId: this.userInfo.id }
-      })
-        .then(res => {
-          if (res.data.code === 0 && res.data.rows) {
-            this.effective = res.data.rows.efective;
-            this.totalIntegral = res.data.rows.getTotal;
-          } else {
-
-            Toast.fail("服务器数据错误");
-          }
-        })
-        .catch(error => {
-          Toast.fail(error);
-        });
-    },
-    /*等级规则*/
-    getLevelData() {
-      axios({
-        url: ApiService.getLevel,
-        method: "get"
-      })
-        .then(res => {
-          if (res.data.code === 0 && res.data.rows) {
-            this.levelList = res.data.rows;
-            this.one = res.data.rows[3].minimum;
-            this.lname_one = res.data.rows[3].lname;
-            this.two = res.data.rows[2].minimum;
-            this.lname_two = res.data.rows[2].lname;
-            this.three = res.data.rows[1].minimum;
-            this.lname_three = res.data.rows[1].lname;
-            this.four = res.data.rows[0].minimum;
-            this.lname_four = res.data.rows[0].lname;
-          } else {
-            Toast.fail("服务器数据错误");
-          }
-          console.log(res.data.rows);
-        })
-        .catch(error => {
-          Toast.fail(error);
-        });
-    },
-    onClick(index) {
-      switch (index) {
-        case 0:
-          Toast("待确定");
-          break;
-        case 1:
-          Toast("已确定");
-          break;
-        case 2:
-          Toast("已完成");
-          break;
-        case 3:
-          Toast("待评价");
-          break;
-      }
-    },
-    onClickItem(index) {
-      switch (index) {
-        case 0:
-          Toast("我的积分");
-          break;
-        case 1:
-          Toast("会员权限");
-          break;
-        case 2:
-          Toast("个人信息");
-          break;
-      }
-    }
-  }
-};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

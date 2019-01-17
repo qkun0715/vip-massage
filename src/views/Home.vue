@@ -67,6 +67,7 @@
                 subbranchId: '', //分店id
                 subbranchName: '', //分店名字
                 subscribe: {}, //订阅对象需要的数据
+                groupsSubbranchBean: {}, //集团店铺对象（如果groupsSubbranch有值直接拷贝，没有值自己创建对象）
             };
         },
         computed: {
@@ -189,6 +190,18 @@
                     subbranchId: item.subbranchId,
                 });
                 this.setSubscribe(this.subscribe);
+                /** 将集团店铺信息保存起来*/
+                if (this.groupsSubbranch.subbranchName) {
+                    this.setGroupsSubbranch(this.groupsSubbranch);
+                } else {
+                    this.groupsSubbranchBean = Object.assign({
+                        groupId: this.groupId,
+                        groupsName: this.groupName,
+                        subbranchId: this.subbranchId,
+                        subbranchName: this.subbranchName,
+                    });
+                    this.setGroupsSubbranch(this.groupsSubbranchBean);
+                }
                 this.$router.push({name: 'Subscribe'});
             },
             /**点击条目事件**/
@@ -197,6 +210,7 @@
             },
             ...mapMutations({
                 setSubscribe: 'setSubscribe',
+                setGroupsSubbranch: 'setGroupsSubbranch',
             }),
         },
     };
